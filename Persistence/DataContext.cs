@@ -14,6 +14,9 @@ namespace Persistence
 
         public DbSet<State> State { get; set; }
         public DbSet<Task> Task { get; set; }
+        public DbSet<Flow> Flow { get; set; }
+        public DbSet<TaskValue> TaskValue { get; set; }
+
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
