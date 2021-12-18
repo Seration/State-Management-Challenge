@@ -4,13 +4,13 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Domain
 {
-    public class State: BaseModel
+    public class TaskValue
     {
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int Id { get; set; }
-        public int FlowId { get; set; }
-        public string Name { get; set; }
-        public int Index { get; set; }
+        public int TaskId { get; set; }
+        public int StateId { get; set; }
+        public string Value { get; set; }
     }
 }

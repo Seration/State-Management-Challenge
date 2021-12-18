@@ -14,10 +14,14 @@
 
   <ItemGroup>
     <None Remove="Microsoft.EntityFrameworkCore.Design" />
+    <None Remove="Controllers\" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Application\Application.csproj">
       <GlobalPropertiesToRemove></GlobalPropertiesToRemove>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Controllers\" />
   </ItemGroup>
 </Project>
