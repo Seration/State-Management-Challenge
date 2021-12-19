@@ -17,7 +17,7 @@ namespace Application.Services
 
         }
 
-        public async Task<Tuple<int, string>> BacwardTaskAsync(Domain.Task task)
+        public async Task<Tuple<int, string>> BackwardTaskAsync(Domain.Task task)
         {
             Domain.Task currentTask = await _context.Set<Domain.Task>().FindAsync(task.Id);
 
@@ -74,14 +74,24 @@ namespace Application.Services
             return Tuple.Create(task.CurrentStateIndex++, value);
         }
 
-        public async Task<IEnumerable<Domain.Task>> GetAllTaskBelongTheFlowAsync(int flowId)
+        public async Task<IEnumerable<Domain.Task>> GetAllTaskBelongToFlowAsync(int flowId)
         {
             return await _context.Set<Domain.Task>().Where(x => x.FlowId == flowId).ToListAsync();
         }
 
-        public async Task<IEnumerable<Domain.Task>> GetAllTaskBelongTheStateAsync(int stateId)
+        public async Task<IEnumerable<Domain.Task>> GetAllTaskBelongToStateAsync(int stateId)
         {
             return await _context.Set<Domain.Task>().Where(x => x.StateId == stateId).ToListAsync();
+        }
+
+        public async Task<bool> UpdateTaskName(Domain.Task task)
+        {
+            Domain.Task currentTask = await _context.Set<Domain.Task>().SingleOrDefaultAsync(s => s.Id == task.Id);
+            currentTask.Name = task.Name;
+
+            bool IsSuccess = await _context.SaveChangesAsync() > 0;
+
+            return IsSuccess;
         }
     }
 

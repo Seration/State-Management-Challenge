@@ -6,9 +6,6 @@ namespace Domain
 {
     public class Task:BaseModel
     {
-        [Key]
-        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public int Id { get; set; }
         public int FlowId { get; set; }
         public int StateId { get; set; }
         public int CurrentStateIndex { get; set; }

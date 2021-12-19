@@ -33,17 +33,22 @@ namespace Application.Services
                 state.Index = newIndexList.Where(x => x.StateId == state.Id).FirstOrDefault().StateIndex;
             }
 
-            bool IsSuccess =  await _context.SaveChangesAsync() > 0;
-
-            if (IsSuccess)
-                return true;
-            else
-                return false;
+            return  await _context.SaveChangesAsync() > 0;
         }
 
-        public async Task<IEnumerable<State>> GetAllStateBelongTheFlowAsync(int flowId)
+        public async Task<IEnumerable<State>> GetAllStateBelongToFlowAsync(int flowId)
         {
            return await _context.Set<State>().Where(x => x.FlowId == flowId).ToListAsync();
+        }
+
+        public async Task<bool> UpdateStateName(State state)
+        {
+            State currentState = await _context.Set<State>().SingleOrDefaultAsync(s => s.Id == state.Id);
+            currentState.Name = state.Name;
+
+            bool IsSuccess = await _context.SaveChangesAsync() > 0;
+
+            return IsSuccess;
         }
     }
 }

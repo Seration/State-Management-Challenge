@@ -15,6 +15,7 @@
   <ItemGroup>
     <None Remove="Microsoft.EntityFrameworkCore.Design" />
     <None Remove="Controllers\" />
+    <None Remove="Middleware\" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Application\Application.csproj">
@@ -23,5 +24,6 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Controllers\" />
+    <Folder Include="Middleware\" />
   </ItemGroup>
 </Project>

@@ -2,6 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using API.Middleware;
+using Application.Repositories;
+using Application.Services;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
@@ -32,7 +35,13 @@ namespace API
                 opt.UseNpgsql(Configuration.GetConnectionString("DefaultConnection"));
             });
 
+            services.AddTransient<IStateRepository, StateRepository>();
+            services.AddTransient<IFlowRepository, FlowRepository>();
+            services.AddTransient<ITaskRepository, TaskRepository>();
+            services.AddTransient<ITaskValueRepository, TaskValueRepository>();
+
             services.AddControllers();
+
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "API", Version = "v1" });
@@ -48,6 +57,8 @@ namespace API
                 app.UseSwagger();
                 app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "API v1"));
             }
+
+            app.UseMiddleware<ErrorHandlingMiddleWare>();
 
             app.UseRouting();
 

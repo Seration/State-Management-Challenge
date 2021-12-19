@@ -9,44 +9,54 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Application.Services
 {
-    public class Repository<T> : IRepository<T> where T:BaseModel
+    public class Repository<T> : IRepository<T> where T : BaseModel
     {
         protected readonly DbContext _context;
+        private DbSet<T> entities;
 
         public Repository(DbContext context)
         {
-           _context = context;
+            _context = context;
+            entities = _context.Set<T>();
         }
 
-        public async System.Threading.Tasks.Task AddAsync(T entity)
+        public async Task<bool> AddAsync(T entity)
         {
-            await _context.Set<T>().AddAsync(entity);
+            await entities.AddAsync(entity);
+            return await SaveDbChangesAsync();
+        }
+
+        public async Task<bool> DeleteAsync(int entityId)
+        {
+            T currentEntity = await entities.SingleOrDefaultAsync(s => s.Id == entityId);
+            currentEntity.IsActive = false;
+            return await SaveDbChangesAsync();
         }
 
         public IEnumerable<T> Find(Expression<Func<T, bool>> predicate)
         {
-            return _context.Set<T>().Where(predicate);
+            return entities.Where(predicate);
         }
 
         public async Task<bool> SaveDbChangesAsync()
         {
-          return await _context.SaveChangesAsync() > 0;
+            return await _context.SaveChangesAsync() > 0;
         }
 
         public async Task<T> SingleOrDefaultAsync(Expression<Func<T, bool>> predicate)
         {
-            return await _context.Set<T>().SingleOrDefaultAsync(predicate);
+            return await entities.SingleOrDefaultAsync(predicate);
         }
 
 
         async Task<IEnumerable<T>> IRepository<T>.GetAllAsync()
         {
-            return await _context.Set<T>().ToListAsync();
+            return await entities.ToListAsync();
         }
 
         async ValueTask<T> IRepository<T>.GetByIdAsync(int id)
         {
-            return await _context.Set<T>().FindAsync(id);
+            return await entities.FindAsync(id);
         }
     }
 }

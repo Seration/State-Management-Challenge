@@ -12,7 +12,8 @@ namespace Application.Repositories
         Task<IEnumerable<T>> GetAllAsync();
         IEnumerable<T> Find(Expression<Func<T, bool>> predicate);
         Task<T> SingleOrDefaultAsync(Expression<Func<T, bool>> predicate);
-        System.Threading.Tasks.Task AddAsync(T entity);
+        Task<bool> AddAsync(T entity);
         Task<bool> SaveDbChangesAsync();
+        Task<bool> DeleteAsync(int entityId);
     }
 }
