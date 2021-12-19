@@ -9,8 +9,9 @@ namespace Application.Repositories
     {
         Task<IEnumerable<Domain.Task>> GetAllTaskBelongToFlowAsync(int flowId);
         Task<IEnumerable<Domain.Task>> GetAllTaskBelongToStateAsync(int stateId);
-        Task<Tuple<int,string>> ForwardTaskAsync(Domain.Task task);
-        Task<Tuple<int, string>> BackwardTaskAsync(Domain.Task task);
+        Task<Tuple<int,string>> ForwardTaskAsync(int taskId);
+        Task<Tuple<int, string>> BackwardTaskAsync(int taskId);
         Task<bool> UpdateTaskName(Domain.Task task);
+        Task<bool> CheckStateExist(int stateId);
     }
 }

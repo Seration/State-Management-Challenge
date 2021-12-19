@@ -6,8 +6,13 @@ namespace Domain
 {
     public class TaskValue: BaseModel
     {
+        [Required]
         public int TaskId { get; set; }
+
+        [Required]
         public int StateId { get; set; }
+
+        [Required]
         public string Value { get; set; }
     }
 }

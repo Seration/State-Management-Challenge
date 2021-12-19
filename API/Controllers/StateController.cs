@@ -13,10 +13,12 @@ namespace API.Controllers
     public class StateController : Controller
     {
         private readonly IStateRepository _stateRepository;
+        private readonly IFlowRepository _flowRepository;
 
-        public StateController(IStateRepository stateRepository)
+        public StateController(IStateRepository stateRepository, IFlowRepository flowRepository)
         {
             _stateRepository = stateRepository;
+            _flowRepository = flowRepository;
         }
 
         [HttpGet]
@@ -32,14 +34,26 @@ namespace API.Controllers
         }
 
         [HttpPost]
-        public async Task<bool> CreateStateAsync([FromBody] State state)
+        public async Task<bool> CreateStateAsync(State state)
         {
+            var flow = _flowRepository.Find(s => s.Id == state.FlowId);
+
+            if (flow == null)
+                return false;
+
+            state.Index = await _stateRepository.GetNextStateIndexAsync(state.FlowId);
+
             return await _stateRepository.AddAsync(state);
         }
 
         [HttpPut]
         public async Task<bool> Put([FromBody] State state)
         {
+            var flow = _flowRepository.Find(s => s.Id == state.FlowId);
+
+            if (flow == null)
+                return false;
+
             return await _stateRepository.UpdateStateName(state);
         }
 
@@ -56,7 +70,7 @@ namespace API.Controllers
         }
 
         [HttpPost("ChangeStateOrder")]
-        public async Task<bool> ChangeStateOrderAsync(IEnumerable<ChangeStateOrderDto> newIndexList, int flowId)
+        public async Task<bool> ChangeStateOrderAsync([FromBody]IEnumerable<ChangeStateOrderDto> newIndexList, int flowId)
         {
             return await _stateRepository.ChangeStateOrderAsync(newIndexList, flowId);
         }

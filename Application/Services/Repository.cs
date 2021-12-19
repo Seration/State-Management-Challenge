@@ -26,6 +26,13 @@ namespace Application.Services
             return await SaveDbChangesAsync();
         }
 
+        public async Task<T> AddWithReturnAsync(T entity)
+        {
+            await entities.AddAsync(entity);
+            await SaveDbChangesAsync();
+            return entity;
+        }
+
         public async Task<bool> DeleteAsync(int entityId)
         {
             T currentEntity = await entities.SingleOrDefaultAsync(s => s.Id == entityId);
@@ -51,12 +58,12 @@ namespace Application.Services
 
         async Task<IEnumerable<T>> IRepository<T>.GetAllAsync()
         {
-            return await entities.ToListAsync();
+            return await entities.Where(s=> s.IsActive == true).AsNoTracking().ToListAsync();
         }
 
         async ValueTask<T> IRepository<T>.GetByIdAsync(int id)
         {
-            return await entities.FindAsync(id);
+            return await entities.Where(s=> s.IsActive == true && s.Id == id).AsNoTracking().FirstOrDefaultAsync();
         }
     }
 }

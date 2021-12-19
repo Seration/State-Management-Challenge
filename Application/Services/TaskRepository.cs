@@ -17,71 +17,81 @@ namespace Application.Services
 
         }
 
-        public async Task<Tuple<int, string>> BackwardTaskAsync(Domain.Task task)
+        public async Task<Tuple<int, string>> BackwardTaskAsync(int taskId)
         {
-            Domain.Task currentTask = await _context.Set<Domain.Task>().FindAsync(task.Id);
+            Domain.Task currentTask = await _context.Set<Domain.Task>().FindAsync(taskId);
 
-            if (task.CurrentStateIndex == 1)
+            if (currentTask.CurrentStateIndex == 1)
                 return Tuple.Create(-1, "");
 
-            task.CurrentStateIndex--;
+            currentTask.CurrentStateIndex = currentTask.CurrentStateIndex -1;
+
+            var previousState = await _context.Set<State>().Where(s => s.Index == currentTask.CurrentStateIndex)
+                                                           .FirstOrDefaultAsync();
+            currentTask.StateId = previousState.Id;
             await _context.SaveChangesAsync();
 
             var taskValue = await _context.Set<TaskValue>()
-                                          .Where(s => s.StateId == task.CurrentStateIndex && s.TaskId == task.Id)
+                                          .Where(s => s.StateId == currentTask.StateId && s.TaskId == taskId)
                                           .AsNoTracking()
                                           .FirstOrDefaultAsync();
 
-            return Tuple.Create(task.CurrentStateIndex, taskValue.Value);
+            return Tuple.Create(currentTask.CurrentStateIndex, taskValue.Value);
         }
 
-        public async Task<Tuple<int, string>> ForwardTaskAsync(Domain.Task task)
+        public async Task<bool> CheckStateExist(int stateId)
         {
-            int stateCountInFlow = _context.Set<Domain.State>().Count(s => s.FlowId == task.FlowId);
+            bool isStateExist = await _context.Set<State>().AnyAsync(s => s.Id == stateId);
+            return isStateExist;
+        }
 
-            if (task.CurrentStateIndex == stateCountInFlow)
+        public async Task<Tuple<int, string>> ForwardTaskAsync(int taskId)
+        {
+            var currentTask = await _context.Set<Domain.Task>().SingleOrDefaultAsync(s => s.Id == taskId);
+            int stateCountInFlow = _context.Set<Domain.State>().Count(s => s.FlowId == currentTask.FlowId);
+
+            if (currentTask.CurrentStateIndex == stateCountInFlow)
                 return Tuple.Create(-1, "");
 
-            task.CurrentStateIndex++;
+            currentTask.CurrentStateIndex = currentTask.CurrentStateIndex + 1;
+
+            var nextState = await _context.Set<State>().Where(s => s.Index == currentTask.CurrentStateIndex)
+                                                       .FirstOrDefaultAsync();
+            currentTask.StateId = nextState.Id;
 
             var taskValue = await _context.Set<TaskValue>()
-                                          .Where(s => s.StateId == task.StateId && s.TaskId == task.Id)
+                                          .Where(s => s.StateId == currentTask.StateId && s.TaskId == taskId)
                                           .AsNoTracking()
                                           .FirstOrDefaultAsync();
 
             if (taskValue != null)
             {
                 await _context.SaveChangesAsync();
-                return Tuple.Create(task.CurrentStateIndex, taskValue.Value);
+                return Tuple.Create(currentTask.CurrentStateIndex, taskValue.Value);
             }
-
-            var nextState = await _context.Set<State>()
-                     .Where(s => s.Index == task.CurrentStateIndex)
-                     .AsNoTracking()
-                     .FirstOrDefaultAsync();
 
             var value = Guid.NewGuid().ToString().Substring(0, 4);
 
             await _context.Set<TaskValue>().AddAsync(new TaskValue
             {
                 StateId = nextState.Id,
-                TaskId = task.Id,
+                TaskId = taskId,
                 Value = value
             });
 
             await _context.SaveChangesAsync();
 
-            return Tuple.Create(task.CurrentStateIndex++, value);
+            return Tuple.Create(currentTask.CurrentStateIndex, value);
         }
 
         public async Task<IEnumerable<Domain.Task>> GetAllTaskBelongToFlowAsync(int flowId)
         {
-            return await _context.Set<Domain.Task>().Where(x => x.FlowId == flowId).ToListAsync();
+            return await _context.Set<Domain.Task>().Where(x => x.FlowId == flowId && x.IsActive == true).ToListAsync();
         }
 
         public async Task<IEnumerable<Domain.Task>> GetAllTaskBelongToStateAsync(int stateId)
         {
-            return await _context.Set<Domain.Task>().Where(x => x.StateId == stateId).ToListAsync();
+            return await _context.Set<Domain.Task>().Where(x => x.StateId == stateId && x.IsActive == true).ToListAsync();
         }
 
         public async Task<bool> UpdateTaskName(Domain.Task task)

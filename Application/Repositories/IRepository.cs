@@ -13,6 +13,7 @@ namespace Application.Repositories
         IEnumerable<T> Find(Expression<Func<T, bool>> predicate);
         Task<T> SingleOrDefaultAsync(Expression<Func<T, bool>> predicate);
         Task<bool> AddAsync(T entity);
+        Task<T> AddWithReturnAsync(T entity);
         Task<bool> SaveDbChangesAsync();
         Task<bool> DeleteAsync(int entityId);
     }

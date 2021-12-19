@@ -9,6 +9,7 @@ namespace Domain
         public BaseModel()
         {
             CreatedDate = DateTime.Now;
+            IsActive = true;
         }
 
         [Key]

@@ -6,6 +6,7 @@ namespace Domain
 {
     public class Flow : BaseModel
     {
+        [Required]
         public string Name { get; set; }
     }
 }
